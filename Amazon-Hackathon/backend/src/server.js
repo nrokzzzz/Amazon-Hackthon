@@ -1,19 +1,21 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
-import { config, isBedrockConfigured, isGoogleConfigured, isGmailConfigured, isGeminiConfigured } from './config/env.js';
+import { config, isBedrockConfigured, isGoogleConfigured, isGmailConfigured, isGeminiConfigured, isDeepgramConfigured } from './config/env.js';
 import { connectDB } from './config/db.js';
 
 import { authRouter } from './auth/routes.js';
 import { profileRouter } from './profile/routes.js';
 import { portalRouter } from './portal/routes.js';
-import { ingestRouter } from './ingestion/routes.js';
 import { eventsRouter } from './events/routes.js';
 import { calendarRouter } from './calendar/routes.js';
 import { gmailRouter } from './gmail/routes.js';
 import { digestRouter } from './digest/routes.js';
 import { chatRouter } from './chat/routes.js';
+import { voiceRouter } from './voice/routes.js';
+import { attachVoiceStream } from './voice/stream.js';
 import { startWatchScheduler } from './gmail/scheduler.js';
+import { startPriorityScheduler } from './digest/priorityScheduler.js';
 
 const app = express();
 
@@ -45,6 +47,7 @@ app.get('/health', (_req, res) => {
     google_calendar: isGoogleConfigured() ? 'configured' : 'simulation',
     gmail_push: isGmailConfigured() ? 'configured' : 'disabled',
     categorizer: isGeminiConfigured() ? 'gemini' : 'fallback (rule-based)',
+    voice: isDeepgramConfigured() ? 'deepgram' : 'disabled',
   });
 });
 
@@ -52,11 +55,11 @@ app.get('/health', (_req, res) => {
 app.use('/auth', authRouter);
 app.use('/profile', profileRouter);
 app.use('/portal', portalRouter);
-app.use('/ingest', ingestRouter);
 app.use('/events', eventsRouter);
 app.use('/gmail', gmailRouter);
 app.use('/college-info', digestRouter); // structured per-student college digest
 app.use('/chat', chatRouter); // chatbot grounded in the digest
+app.use('/voice', voiceRouter); // Deepgram speech-to-text + text-to-speech
 app.use('/', calendarRouter); // /auth/google/* and /calendar/* (absolute paths)
 
 // 404
@@ -70,15 +73,24 @@ app.use((err, _req, res, _next) => {
 
 export async function start() {
   await connectDB();
-  app.listen(config.port, () => {
+  const server = app.listen(config.port, () => {
     console.log(`[server] CampusFlow backend on http://localhost:${config.port}`);
     console.log(`[server] extraction: ${isBedrockConfigured() ? 'Bedrock' : 'rule-based fallback'}`);
     console.log(`[server] google calendar: ${isGoogleConfigured() ? 'configured' : 'simulation mode'}`);
     console.log(`[server] gmail push: ${isGmailConfigured() ? 'configured' : 'disabled'}`);
+    console.log(`[server] voice: ${isDeepgramConfigured() ? 'deepgram (live STT + TTS)' : 'disabled'}`);
   });
+
+  // Live speech-to-text WebSocket proxy (/voice/stream).
+  attachVoiceStream(server);
 
   // Keep Gmail watches alive automatically (no user action needed).
   if (isGmailConfigured()) startWatchScheduler();
+
+  // Hourly: re-prioritize + drop tasks whose time has passed (per student).
+  startPriorityScheduler();
+
+  return server;
 }
 
 // Only auto-start when run directly (e.g. `node src/server.js`), not on import

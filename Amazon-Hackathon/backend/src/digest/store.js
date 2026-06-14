@@ -2,17 +2,48 @@ import crypto from 'crypto';
 import { CollegeInfo } from '../models/CollegeInfo.js';
 import { CATEGORIES } from './categories.js';
 import { categorizeEmail } from './categorize.js';
-
-// Stable fingerprint so the same fact from a re-delivered email isn't stored twice.
-function hashItem(category, item) {
-  const key = `${category}|${(item.title || '').trim().toLowerCase()}|${item.datetime || ''}`;
-  return crypto.createHash('sha256').update(key).digest('hex');
-}
+import { syncDigestItemsToCalendar } from '../calendar/digestCalendar.js';
 
 function toDate(value) {
   if (!value) return undefined;
   const d = new Date(value);
   return Number.isNaN(d.getTime()) ? undefined : d;
+}
+
+// Common keys the LLM uses for a "last date" / deadline inside details. If the
+// top-level datetime is missing, we pull the deadline from here so the item is
+// still dated — which is what drives prioritization and the hourly expiry cron.
+const DEADLINE_KEYS = [
+  'last_date', 'last_date_to_pay', 'due', 'due_date', 'deadline', 'payment_deadline',
+  'registration_deadline', 'last_date_of_registration', 'submission_date', 'closing_date',
+];
+
+function deadlineFromDetails(details) {
+  if (!details || typeof details !== 'object') return undefined;
+  for (const k of DEADLINE_KEYS) {
+    const d = toDate(details[k]);
+    if (d) return d;
+  }
+  // Catch-all: any field whose name mentions a date/deadline/last-date.
+  for (const [k, v] of Object.entries(details)) {
+    if (/date|deadline|\blast\b|\bdue\b/i.test(k)) {
+      const d = toDate(v);
+      if (d) return d;
+    }
+  }
+  return undefined;
+}
+
+// The single action-critical date for an item: the explicit datetime, else any
+// last date/deadline buried in details.
+function resolveDeadline(item) {
+  return toDate(item.datetime) ?? deadlineFromDetails(item.details);
+}
+
+// Stable fingerprint so the same fact from a re-delivered email isn't stored twice.
+function hashItem(category, title, deadline) {
+  const key = `${category}|${(title || '').trim().toLowerCase()}|${deadline ? deadline.toISOString() : ''}`;
+  return crypto.createHash('sha256').update(key).digest('hex');
 }
 
 // Categorize one email's content and merge the resulting items into the
@@ -34,10 +65,14 @@ export async function categorizeAndStore(
 
   let added = 0;
   const byCategory = {};
+  const newItems = []; // references to the subdocs we just pushed
 
   for (const it of items) {
     const category = CATEGORIES.includes(it.category) ? it.category : 'general';
-    const content_hash = hashItem(category, it);
+    // The deadline / last date drives priority + the expiry cron. Pull it from
+    // details when the LLM didn't put it at the top level.
+    const deadline = resolveDeadline(it);
+    const content_hash = hashItem(category, it.title, deadline);
 
     const bucket = doc[category];
     if (bucket.some((x) => x.content_hash === content_hash)) continue;
@@ -46,7 +81,7 @@ export async function categorizeAndStore(
       category,
       title: it.title,
       summary: it.summary || '',
-      datetime: toDate(it.datetime),
+      datetime: deadline,
       importance: it.importance || 'med',
       action_required: Boolean(it.action_required),
       link: it.link || '',
@@ -59,10 +94,23 @@ export async function categorizeAndStore(
       content_hash,
       received_at: now,
     });
+    newItems.push(bucket[bucket.length - 1]); // the cast subdocument
     added++;
     byCategory[category] = (byCategory[category] || 0) + 1;
   }
 
+  // Auto-add dated items to Google Calendar with reminders (no sync button).
+  // Mutates item.gcal_event_id in place, so save() below persists it.
+  let calendarEvents = 0;
+  if (newItems.length) {
+    try {
+      const r = await syncDigestItemsToCalendar(student, newItems);
+      calendarEvents = r.created || 0;
+    } catch (err) {
+      console.error('[calendar] digest auto-sync error:', err?.message || err);
+    }
+  }
+
   if (added) await doc.save();
-  return { engine, added, by_category: byCategory };
+  return { engine, added, by_category: byCategory, calendar_events: calendarEvents };
 }

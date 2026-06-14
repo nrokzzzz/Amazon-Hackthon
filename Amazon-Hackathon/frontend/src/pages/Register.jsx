@@ -43,7 +43,7 @@ export default function Register() {
         profile,
       });
       login(data.token, data.student);
-      nav('/connect');
+      nav('/profile');
     } catch (err) {
       setError(err?.response?.data?.error || 'Registration failed');
     } finally {

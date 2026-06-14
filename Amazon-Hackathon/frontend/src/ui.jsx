@@ -1,4 +1,56 @@
 // Small shared UI primitives + importance/quadrant styling helpers.
+import { useState } from 'react';
+
+// Chip/tag input: type a value and press Enter (or comma) to add it; click × or
+// press Backspace on an empty field to remove. `value` is an array of strings.
+export function TagInput({ value = [], onChange, placeholder = 'Type and press Enter' }) {
+  const [draft, setDraft] = useState('');
+
+  const add = (raw) => {
+    const t = String(raw).trim();
+    if (t && !value.includes(t)) onChange([...value, t]);
+    setDraft('');
+  };
+  const removeAt = (i) => onChange(value.filter((_, idx) => idx !== i));
+
+  const onKeyDown = (e) => {
+    if (e.key === 'Enter' || e.key === ',') {
+      e.preventDefault();
+      add(draft);
+    } else if (e.key === 'Backspace' && !draft && value.length) {
+      removeAt(value.length - 1);
+    }
+  };
+
+  return (
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2 py-2 focus-within:border-indigo-400">
+      {value.map((tag, i) => (
+        <span
+          key={`${tag}-${i}`}
+          className="inline-flex items-center gap-1 rounded-md bg-indigo-500/20 px-2 py-1 text-xs text-indigo-200"
+        >
+          {tag}
+          <button
+            type="button"
+            onClick={() => removeAt(i)}
+            className="text-indigo-300 hover:text-white"
+            aria-label={`Remove ${tag}`}
+          >
+            ×
+          </button>
+        </span>
+      ))}
+      <input
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onKeyDown={onKeyDown}
+        onBlur={() => add(draft)}
+        placeholder={value.length ? '' : placeholder}
+        className="min-w-[140px] flex-1 bg-transparent py-1 text-sm text-slate-100 outline-none placeholder:text-slate-500"
+      />
+    </div>
+  );
+}
 
 export const IMPORTANCE_STYLES = {
   critical: { label: 'CRITICAL', cls: 'bg-red-500/15 text-red-300 border-red-500/30' },

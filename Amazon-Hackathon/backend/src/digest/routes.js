@@ -6,6 +6,7 @@ import { isGeminiConfigured } from '../config/env.js';
 import { CollegeInfo } from '../models/CollegeInfo.js';
 import { categorizeAndStore } from './store.js';
 import { digestCounts } from './serialize.js';
+import { prioritizeDigest } from './priority.js';
 import { CATEGORIES } from './categories.js';
 import { extractAttachment, MAX_FILE_BYTES } from '../attachments/extract.js';
 
@@ -21,6 +22,20 @@ digestRouter.get('/', requireAuth, async (req, res) => {
     engine: isGeminiConfigured() ? 'gemini' : 'fallback (rule-based)',
     counts: digestCounts(doc),
     data: doc || Object.fromEntries(CATEGORIES.map((c) => [c, []])),
+  });
+});
+
+// GET /college-info/tasks — the student's items, prioritized (most important
+// first) by deadline urgency + category + their goals/focus, with alerts.
+digestRouter.get('/tasks', requireAuth, async (req, res) => {
+  const doc = await CollegeInfo.findOne({ student_id: req.student._id });
+  const profile = req.student.profile?.toObject?.() ?? req.student.profile ?? {};
+  const tasks = prioritizeDigest(doc, profile);
+  res.json({
+    ok: true,
+    tasks,
+    alerts: tasks.filter((t) => t.alert),
+    overlaps: tasks.filter((t) => t.overlap),
   });
 });
 

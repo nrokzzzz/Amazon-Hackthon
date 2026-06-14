@@ -3,9 +3,7 @@ import { useAuth } from '../auth/AuthContext.jsx';
 
 const NAV = [
   { to: '/', label: 'Today', icon: '🗓️', end: true },
-  { to: '/ingest', label: 'Inbox', icon: '📥' },
   { to: '/chat', label: 'Assistant', icon: '💬' },
-  { to: '/connect', label: 'Calendar', icon: '🔗' },
   { to: '/profile', label: 'Profile', icon: '👤' },
 ];
 
@@ -14,7 +12,7 @@ export default function Layout({ children }) {
   const nav = useNavigate();
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex h-screen overflow-hidden">
       {/* Sidebar — the OS-like home shell */}
       <aside className="flex w-60 flex-col border-r border-white/10 bg-white/[0.02] p-4">
         <div className="mb-8 px-2">

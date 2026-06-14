@@ -16,7 +16,7 @@ Rules:
     "category": one of the category names above,
     "title": string,            // short, specific (e.g. "DBMS End-Sem Exam", "Supplementary Exam Fee")
     "summary": string,          // 1-2 lines; include consequences/venue/amounts if stated
-    "datetime": string|null,    // ISO 8601 with offset (+05:30 if unspecified) for the main date/deadline, else null
+    "datetime": string|null,    // ISO 8601 with offset (+05:30 if unspecified). MUST be the action-critical deadline / LAST DATE (to pay, submit, register, apply) when one exists; otherwise the event date. null only if the item truly has no date.
     "importance": "critical"|"high"|"med"|"low",  // by CONSEQUENCE of missing it (see below)
     "action_required": boolean, // true if the student must DO something (pay, submit, register, apply)
     "link": string,             // registration / payment / JD url if present, else ""
@@ -35,6 +35,7 @@ Rules:
   }
 - IMPORTANCE (by consequence of missing it): critical = exam, exam/supplementary fee deadline, attendance-debarment, placement deadline. high = assignment/lab/project/registration deadline. med = classes, opted events. low = FYI/general.
 - A fee notice belongs in "fees" (NOT exam_timetable), even if it mentions an exam. Put the exam-fee amount in "amount" and last date in "datetime".
+- LAST DATE / DEADLINE: if the email mentions a "last date", "due", "deadline", "before <date>", "by <date>", or registration-closes date, that date is the most important — put it in "datetime" (and also keep it in details, e.g. last_date/due). Never leave datetime null when a deadline exists.
 - DATES: resolve relative dates ("tomorrow", "by 25th", "next Monday") against the provided current date. Always emit ISO 8601 with a timezone offset (assume +05:30 India time if none given). If no date applies, use null.`;
 
 export function buildCategorizeUser(rawText, now = new Date()) {

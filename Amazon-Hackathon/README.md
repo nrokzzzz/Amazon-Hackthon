@@ -76,8 +76,9 @@ npm run dev                 # http://localhost:5173
 
 ### 3. Try it
 1. **Register** (short form; enrichment is optional/skippable).
-2. **Connect** Google Calendar (or skip — simulation mode works for the demo).
-3. **Inbox → Pull portal** (or paste the *sample pile*).
+2. **Profile → Connect Google account** — auto-imports college emails (and syncs Calendar).
+   College emails (from the configured sender) are read, classified by Gemini, and stored.
+3. **Assistant** — ask about exams, deadlines, fees, placements, or "make me a study plan".
 4. **Today** shows your events ranked by priority, with attendance warning,
    reminder ladders, and Eisenhower behavior — **Confirm & sync** or **Sync all**.
 
@@ -147,7 +148,9 @@ Importance decides the reminder ladder; urgency reorders automatically.
 | GET/PUT | `/profile` | flexible JSON profile (+ derived `current_year`) |
 | GET | `/auth/google/connect` · `/auth/google/callback` | OAuth + refresh token |
 | GET | `/portal/{attendance,notices,deadlines,exams,all}` | mock college API |
-| POST | `/ingest/{paste,upload,portal}` | raw items (content_hash dedupe) |
+| POST | `/gmail/{watch,stop}` · GET `/gmail/status` · POST `/gmail/pubsub` | Gmail Pub/Sub email capture |
+| GET | `/college-info` · POST `/college-info/{ingest,upload}` | classified per-student digest |
+| POST | `/chat/ask` · GET/DELETE `/chat/history` | digest-grounded chatbot |
 | GET | `/events` · PUT `/events/:id` | control center (sorted, confirm/edit/dismiss) |
 | GET | `/calendar/status` · POST `/calendar/sync` | idempotent calendar sync |
 

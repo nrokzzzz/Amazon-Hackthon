@@ -1,4 +1,5 @@
 import { CATEGORIES } from './categories.js';
+import { isLive } from './priority.js';
 
 const LABELS = {
   class_timetable: 'CLASS TIMETABLE',
@@ -22,11 +23,13 @@ function fmtDate(d) {
 
 // Flatten the CollegeInfo document into a compact, readable text block that we
 // feed to the chatbot as grounding context.
-export function serializeDigest(doc) {
+export function serializeDigest(doc, now = new Date()) {
   if (!doc) return '(no college information stored yet)';
   const lines = [];
   for (const cat of CATEGORIES) {
-    const items = doc[cat] || [];
+    // Only show LIVE items — past/expired tasks are dropped so the assistant
+    // never treats a dead deadline as upcoming.
+    const items = (doc[cat] || []).filter((it) => isLive(it, now));
     if (!items.length) continue;
     lines.push(`## ${LABELS[cat]}`);
     for (const it of items) {

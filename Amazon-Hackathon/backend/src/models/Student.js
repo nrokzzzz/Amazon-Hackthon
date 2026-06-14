@@ -4,8 +4,8 @@ import mongoose from 'mongoose';
 // attributes can be added later with NO migration (Section 5 / 11 of spec).
 const profileSchema = new mongoose.Schema(
   {
-    preferable_study_time: String, // e.g. "evening", "21:00-23:00"
-    focus_subjects: [String], // subjects to improve -> more prep + earlier reminders
+    study_times: [String], // preferred times to study, e.g. ["evening", "21:00-23:00"]
+    focus_subjects: [String], // subjects to improve / find hard -> more prep + earlier reminders
     strengths: [String], // deprioritize prep
     goals: [String], // placement / GATE / higher-studies / target company
     areas_of_interest: [String],

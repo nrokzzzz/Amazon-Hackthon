@@ -94,10 +94,10 @@ gmailRouter.post('/pubsub', async (req, res) => {
   res.status(204).end();
   try {
     const result = await handlePubSubNotification(payload);
-    if (result?.categorized || result?.ingested) {
+    if (result?.categorized || result?.calendarEvents) {
       console.log(
         `[gmail] ${payload.emailAddress}: +${result.categorized || 0} digest item(s), ` +
-          `${result.ingested || 0} event email(s)`
+          `+${result.calendarEvents || 0} calendar event(s) (auto)`
       );
     }
   } catch (err) {

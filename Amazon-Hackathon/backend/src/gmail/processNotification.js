@@ -147,6 +147,7 @@ export async function processHistory(student, newHistoryId) {
   let ingested = 0;
   let skipped = 0;
   let categorized = 0;
+  let calendarEvents = 0;
   const results = [];
 
   for (const id of messageIds) {
@@ -190,6 +191,7 @@ export async function processHistory(student, newHistoryId) {
       try {
         digest = await categorizeAndStore(student, { text, files, source: 'gmail', subject, emailId: id });
         categorized += digest.added || 0;
+        calendarEvents += digest.calendar_events || 0;
       } catch (err) {
         digest = { error: String(err?.message || err) };
       }
@@ -215,5 +217,5 @@ export async function processHistory(student, newHistoryId) {
   student.gmail.history_id = newHistoryId;
   await student.save();
 
-  return { ok: true, ingested, categorized, skipped, considered: messageIds.size, results };
+  return { ok: true, ingested, categorized, calendarEvents, skipped, considered: messageIds.size, results };
 }

@@ -3,8 +3,6 @@ import { useAuth } from './auth/AuthContext.jsx';
 import Layout from './components/Layout.jsx';
 import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
-import Connect from './pages/Connect.jsx';
-import Ingest from './pages/Ingest.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Profile from './pages/Profile.jsx';
 import Chat from './pages/Chat.jsx';
@@ -25,9 +23,7 @@ export default function App() {
       <Route path="/register" element={student && !loading ? <Navigate to="/" replace /> : <Register />} />
 
       <Route path="/" element={<Protected><Dashboard /></Protected>} />
-      <Route path="/ingest" element={<Protected><Ingest /></Protected>} />
       <Route path="/chat" element={<Protected><Chat /></Protected>} />
-      <Route path="/connect" element={<Protected><Connect /></Protected>} />
       <Route path="/profile" element={<Protected><Profile /></Protected>} />
 
       <Route path="*" element={<Navigate to="/" replace />} />

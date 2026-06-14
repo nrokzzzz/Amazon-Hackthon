@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth/AuthContext.jsx';
-import { Button, Card, Field, Badge, inputCls } from '../ui.jsx';
+import { Button, Card, Field, Badge, TagInput, inputCls } from '../ui.jsx';
 
 // --- Google account / email-capture connection card -----------------------
 function GoogleAccountCard() {
@@ -118,6 +118,15 @@ function GoogleAccountCard() {
             )}
           </div>
 
+          <div className="flex items-start gap-2 rounded-lg bg-indigo-500/5 px-3 py-2 text-xs text-slate-400">
+            <span>⚡</span>
+            <span>
+              Calendar reminders are set automatically when emails arrive —{' '}
+              <span className="text-slate-300">exams 2 days before</span>,{' '}
+              <span className="text-slate-300">placements &amp; deadlines 1 day before</span>. No syncing needed.
+            </span>
+          </div>
+
           <div className="flex flex-wrap items-center gap-3">
             {!watching && (
               <Button onClick={startWatch} disabled={busy} variant="success">
@@ -153,13 +162,13 @@ export default function Profile() {
   const p = student?.profile || {};
   const [form, setForm] = useState({
     section: student?.section || '',
-    preferable_study_time: p.preferable_study_time || '',
-    focus_subjects: (p.focus_subjects || []).join(', '),
-    goals: (p.goals || []).join(', '),
-    areas_of_interest: (p.areas_of_interest || []).join(', '),
+    study_times: p.study_times || [],
+    focus_subjects: p.focus_subjects || [],
+    goals: p.goals || [],
+    areas_of_interest: p.areas_of_interest || [],
   });
 
-  const toList = (s) => s.split(',').map((x) => x.trim()).filter(Boolean);
+  const setList = (key) => (v) => setForm((f) => ({ ...f, [key]: v }));
 
   async function save() {
     setBusy(true);
@@ -168,10 +177,10 @@ export default function Profile() {
       const { data } = await api.put('/profile', {
         section: form.section || undefined,
         profile: {
-          preferable_study_time: form.preferable_study_time,
-          focus_subjects: toList(form.focus_subjects),
-          goals: toList(form.goals),
-          areas_of_interest: toList(form.areas_of_interest),
+          study_times: form.study_times,
+          focus_subjects: form.focus_subjects,
+          goals: form.goals,
+          areas_of_interest: form.areas_of_interest,
         },
       });
       setStudent(data.student);
@@ -211,21 +220,17 @@ export default function Profile() {
         <Field label="Section">
           <input className={inputCls} value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })} placeholder="A" />
         </Field>
-        <Field label="Preferred study time">
-          <input className={inputCls} value={form.preferable_study_time}
-            onChange={(e) => setForm({ ...form, preferable_study_time: e.target.value })} placeholder="evening / 9pm–11pm" />
+        <Field label="Preferred study times" hint="add multiple · the assistant builds study plans around these">
+          <TagInput value={form.study_times} onChange={setList('study_times')} placeholder="e.g. evening, 9pm–11pm, early morning" />
         </Field>
-        <Field label="Subjects to focus on / improve" hint="comma-separated · earlier reminders + more prep">
-          <input className={inputCls} value={form.focus_subjects}
-            onChange={(e) => setForm({ ...form, focus_subjects: e.target.value })} placeholder="DBMS, OS" />
+        <Field label="Subjects to focus on / find hard" hint="the assistant gives these more prep time">
+          <TagInput value={form.focus_subjects} onChange={setList('focus_subjects')} placeholder="e.g. Mathematics, Chemistry" />
         </Field>
-        <Field label="Goals" hint="boosts goal-relevant events">
-          <input className={inputCls} value={form.goals}
-            onChange={(e) => setForm({ ...form, goals: e.target.value })} placeholder="placement, GATE" />
+        <Field label="Goals" hint="e.g. placement → coding/dev focus; GATE → core subjects">
+          <TagInput value={form.goals} onChange={setList('goals')} placeholder="e.g. placement, GATE" />
         </Field>
         <Field label="Areas of interest">
-          <input className={inputCls} value={form.areas_of_interest}
-            onChange={(e) => setForm({ ...form, areas_of_interest: e.target.value })} placeholder="ML, robotics" />
+          <TagInput value={form.areas_of_interest} onChange={setList('areas_of_interest')} placeholder="e.g. ML, web development, robotics" />
         </Field>
 
         <div className="flex items-center gap-3">

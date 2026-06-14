@@ -76,13 +76,25 @@ async function main() {
   const portal = await req('GET', '/portal/all');
   assert(portal.status === 200 && portal.data.notices.length > 0, 'GET /portal/all returns notices');
 
-  // ingest portal -> pipeline
-  const ingest = await req('POST', '/ingest/portal', { token });
-  assert(ingest.status === 200 && ingest.data.totals.matches > 0, 'POST /ingest/portal matched events');
-
-  // re-ingest is idempotent (all duplicates)
-  const ingest2 = await req('POST', '/ingest/portal', { token });
-  assert(ingest2.data.totals.skipped > 0 && ingest2.data.totals.ingested === 0, 're-ingest skips duplicates');
+  // Seed events through the pipeline directly. (The manual /ingest routes were
+  // removed — in production, email arrives automatically via Gmail Pub/Sub.)
+  const { Student } = await import('../models/Student.js');
+  const { RawItem, hashContent } = await import('../models/RawItem.js');
+  const { processRawItem } = await import('../pipeline/processItem.js');
+  const { notices } = await import('../portal/data.js');
+  const student = await Student.findOne({ email: 'asha@example.com' });
+  let matched = 0;
+  for (const n of notices()) {
+    const item = await RawItem.create({
+      student_id: student._id,
+      source: 'portal',
+      raw_text: n.text,
+      content_hash: hashContent(n.text),
+      status: 'pending',
+    });
+    matched += (await processRawItem(item)).matches || 0;
+  }
+  assert(matched > 0, 'pipeline matched events to the student');
 
   // events sorted by priority desc
   const events = await req('GET', '/events', { token });
@@ -91,13 +103,6 @@ async function main() {
   assert(scores.every((s, i) => i === 0 || scores[i - 1] >= s), 'events sorted by priority desc');
   const crit = events.data.events.find((e) => e.importance === 'critical');
   assert(crit && crit.reminder_ladder.length === 5, 'critical event has 5-rung ladder');
-
-  // paste ingestion
-  const paste = await req('POST', '/ingest/paste', {
-    token,
-    body: { text: 'OS lab record submission is due tomorrow 5pm for CSE 3rd year. Mandatory.', source: 'email' },
-  });
-  assert(paste.status === 200 && paste.data.events >= 1, 'POST /ingest/paste extracts an event');
 
   // control-center edit: confirm + resync (simulation)
   const first = (await req('GET', '/events', { token })).data.events[0];

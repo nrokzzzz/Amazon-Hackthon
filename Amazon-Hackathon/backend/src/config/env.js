@@ -33,6 +33,13 @@ export const config = {
     model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
   },
 
+  // Deepgram — voice assistant: speech-to-text (mic) + text-to-speech (replies).
+  deepgram: {
+    apiKey: process.env.DEEPGRAM_API_KEY || '',
+    sttModel: process.env.DEEPGRAM_STT_MODEL || 'nova-2',
+    ttsModel: process.env.DEEPGRAM_TTS_MODEL || 'aura-asteria-en',
+  },
+
   // Gmail push notifications via Google Cloud Pub/Sub.
   gmail: {
     // Full Pub/Sub topic name Gmail should publish to:
@@ -65,3 +72,6 @@ export const isGmailConfigured = () =>
 
 // Gemini powers the LLM categorizer + chatbot. Blank key => rule-based fallback.
 export const isGeminiConfigured = () => Boolean(config.gemini.apiKey);
+
+// Deepgram powers the voice assistant (STT + TTS). Blank key => voice disabled.
+export const isDeepgramConfigured = () => Boolean(config.deepgram.apiKey);

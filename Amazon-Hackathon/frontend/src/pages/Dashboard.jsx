@@ -161,14 +161,6 @@ export default function Dashboard() {
 
         {loading ? (
           <div className="text-slate-500">Loading…</div>
-        ) : active.length === 0 ? (
-          <Card className="text-center">
-            <div className="text-slate-300">No events yet.</div>
-            <p className="mt-1 text-sm text-slate-500">Pull the college portal or paste a notice to get started.</p>
-            <div className="mt-4 flex justify-center gap-3">
-              <Button onClick={() => nav('/ingest')}>Bring in notices</Button>
-            </div>
-          </Card>
         ) : (
           active.map((ev) => <EventRow key={ev.id} ev={ev} onChange={load} />)
         )}

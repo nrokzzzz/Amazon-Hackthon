@@ -30,6 +30,7 @@ const itemSchema = new mongoose.Schema(
     source_email_id: { type: String, default: '' },
 
     content_hash: { type: String, index: true }, // dedupe within a category
+    gcal_event_id: { type: String, default: '' }, // set once auto-added to Google Calendar (idempotent)
     received_at: { type: Date, default: Date.now },
   },
   { _id: true, strict: false, timestamps: false }
