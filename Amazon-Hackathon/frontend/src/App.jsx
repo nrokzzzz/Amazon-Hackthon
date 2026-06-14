@@ -6,6 +6,7 @@ import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Profile from './pages/Profile.jsx';
 import Chat from './pages/Chat.jsx';
+import Tasks from './pages/Tasks.jsx';
 
 function Protected({ children }) {
   const { student, loading } = useAuth();
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/register" element={student && !loading ? <Navigate to="/" replace /> : <Register />} />
 
       <Route path="/" element={<Protected><Dashboard /></Protected>} />
+      <Route path="/tasks" element={<Protected><Tasks /></Protected>} />
       <Route path="/chat" element={<Protected><Chat /></Protected>} />
       <Route path="/profile" element={<Protected><Profile /></Protected>} />
 

@@ -143,11 +143,11 @@ export default function Dashboard() {
   const dismissed = events.filter((e) => e.state === 'dismissed');
 
   return (
-    <div className="mx-auto max-w-3xl p-8">
-      <div className="flex items-end justify-between">
+    <div className="mx-auto max-w-3xl p-4 sm:p-8">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">Today</h1>
-          <p className="text-slate-400">What matters to you, ranked. Highest priority first.</p>
+          <h1 className="text-xl font-bold sm:text-2xl">Today</h1>
+          <p className="text-sm text-slate-400 sm:text-base">What matters to you, ranked. Highest priority first.</p>
         </div>
         <Button variant="success" onClick={syncAll} disabled={syncing || !active.length}>
           {syncing ? 'Syncing…' : 'Sync all to Calendar'}

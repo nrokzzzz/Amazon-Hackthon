@@ -1,0 +1,17 @@
+{
+  "name": "voice",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Voice service — Deepgram speech-to-text (mic) + text-to-speech (replies) + live STT WebSocket proxy. No DB.",
+  "scripts": {
+    "start": "node src/index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  }
+}

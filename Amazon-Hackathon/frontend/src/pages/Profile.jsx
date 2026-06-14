@@ -195,8 +195,8 @@ export default function Profile() {
   if (!student) return null;
 
   return (
-    <div className="mx-auto max-w-2xl p-8">
-      <h1 className="text-2xl font-bold">Profile</h1>
+    <div className="mx-auto max-w-2xl p-4 sm:p-8">
+      <h1 className="text-xl font-bold sm:text-2xl">Profile</h1>
       <p className="mt-1 text-slate-400">Private to you. Powers matching and personalization.</p>
 
       {/* Google account connection (email import + calendar) */}
