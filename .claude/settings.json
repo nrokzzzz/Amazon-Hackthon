@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check src/gmail/routes.js)",
+      "Bash(node --check src/gmail/watch.js)",
+      "Bash(node --check src/gmail/gmailClient.js)",
+      "Bash(node --check src/gmail/processNotification.js)",
+      "Bash(node --check src/server.js)"
+    ]
+  }
+}

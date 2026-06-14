@@ -1,0 +1,36 @@
+{
+  "name": "campusflow-backend",
+  "version": "1.0.0",
+  "description": "CampusFlow backend — Node + Express + Mongoose. Fetch -> Extract -> Match -> Prioritize -> Sync to Google Calendar.",
+  "type": "module",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "dev:mem": "node src/scripts/devmem.js",
+    "dev:tunnel": "node src/scripts/tunnel.js",
+    "dev:tunnel:mem": "node src/scripts/tunnel.js --mem",
+    "start": "node src/server.js",
+    "smoke": "node src/scripts/smoke.js",
+    "test:http": "node src/scripts/httptest.js"
+  },
+  "dependencies": {
+    "@aws-sdk/client-bedrock-runtime": "^3.658.0",
+    "@ngrok/ngrok": "^1.7.0",
+    "adm-zip": "^0.5.17",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "googleapis": "^144.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mammoth": "^1.12.0",
+    "mongoose": "^8.7.0",
+    "morgan": "^1.11.0",
+    "multer": "^2.1.1",
+    "word-extractor": "^1.0.4",
+    "xlsx": "^0.18.5",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "mongodb-memory-server": "^11.2.0"
+  }
+}

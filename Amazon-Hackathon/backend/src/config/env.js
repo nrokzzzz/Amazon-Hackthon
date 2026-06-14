@@ -1,0 +1,67 @@
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Central config object. Secrets live ONLY here on the backend — never in the frontend.
+export const config = {
+  port: process.env.PORT || 4000,
+  nodeEnv: process.env.NODE_ENV || 'development',
+
+  mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/campusflow',
+
+  jwtSecret: process.env.JWT_SECRET || 'dev-only-insecure-secret-change-me',
+
+  aws: {
+    region: process.env.AWS_REGION || 'ap-south-1',
+    bedrockApiKey: process.env.BEDROCK_API_KEY || '',
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+    bedrockModelId: process.env.BEDROCK_MODEL_ID || '',
+  },
+
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID || '',
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    redirectUri:
+      process.env.GOOGLE_REDIRECT_URI ||
+      'http://localhost:4000/auth/google/callback',
+  },
+
+  // Google Gemini (Generative Language API) — powers email categorization + chatbot.
+  gemini: {
+    apiKey: process.env.GEMINI_API_KEY || '',
+    model: process.env.GEMINI_MODEL || 'gemini-2.0-flash',
+  },
+
+  // Gmail push notifications via Google Cloud Pub/Sub.
+  gmail: {
+    // Full Pub/Sub topic name Gmail should publish to:
+    //   projects/<gcp-project-id>/topics/<topic-id>
+    pubsubTopic: process.env.GMAIL_PUBSUB_TOPIC || '',
+    // Shared secret appended to the Pub/Sub push URL (?token=...) so only Google
+    // can hit our webhook. e.g. https://host/gmail/pubsub?token=<this>
+    pubsubToken: process.env.GMAIL_PUBSUB_TOKEN || '',
+    // Only emails FROM these addresses are ingested. Comma-separated.
+    allowedSenders: (process.env.GMAIL_ALLOWED_SENDERS || 'nagurok1234@gmail.com')
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean),
+  },
+
+  frontendUrl: process.env.FRONTEND_URL || 'http://localhost:5173',
+};
+
+// Helpers so feature modules can degrade gracefully when keys are absent
+// (lets the whole pipeline be demoed offline without AWS/Google credentials).
+export const isBedrockConfigured = () =>
+  Boolean(config.aws.bedrockModelId && (config.aws.bedrockApiKey || config.aws.accessKeyId));
+
+export const isGoogleConfigured = () =>
+  Boolean(config.google.clientId && config.google.clientSecret);
+
+// Gmail push needs Google OAuth configured AND a Pub/Sub topic to publish to.
+export const isGmailConfigured = () =>
+  Boolean(isGoogleConfigured() && config.gmail.pubsubTopic);
+
+// Gemini powers the LLM categorizer + chatbot. Blank key => rule-based fallback.
+export const isGeminiConfigured = () => Boolean(config.gemini.apiKey);
