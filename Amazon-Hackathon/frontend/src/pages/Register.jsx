@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Sun, Moon } from 'lucide-react';
 import { api } from '../api.js';
 import { useAuth } from '../auth/AuthContext.jsx';
+import { useTheme } from '../theme/ThemeContext.jsx';
 import { Button, Card, Field, inputCls } from '../ui.jsx';
 
 const BRANCHES = ['CSE', 'ECE', 'EEE', 'MECH', 'CIVIL', 'IT', 'AIML', 'AIDS'];
 
 export default function Register() {
   const { login } = useAuth();
+  const { theme, toggle } = useTheme();
   const nav = useNavigate();
   const [showEnrich, setShowEnrich] = useState(false);
   const [error, setError] = useState('');
@@ -53,12 +56,21 @@ export default function Register() {
 
   return (
     <div className="grid min-h-screen place-items-center p-6">
+      <button
+        onClick={toggle}
+        aria-label="Toggle light/dark theme"
+        title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+        className="fixed right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:bg-white/10 light:border-slate-900/15 light:bg-slate-900/[0.04] light:text-slate-600 light:hover:bg-slate-900/[0.08]"
+      >
+        {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+      </button>
+
       <div className="w-full max-w-lg">
         <div className="mb-6 text-center">
           <div className="text-2xl font-bold">
             Campus<span className="text-indigo-400">Flow</span>
           </div>
-          <p className="mt-1 text-sm text-slate-400">
+          <p className="mt-1 text-sm text-slate-400 light:text-slate-500">
             Register once. We watch the chaos and feed your Google Calendar.
           </p>
         </div>
@@ -107,7 +119,7 @@ export default function Register() {
             </button>
 
             {showEnrich && (
-              <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4">
+              <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.02] p-4 light:border-slate-900/10 light:bg-slate-900/[0.02]">
                 <Field label="Preferred study time" hint="e.g. evening, 9pm–11pm">
                   <input className={inputCls} value={enrich.preferable_study_time}
                     onChange={(e) => setEnrich({ ...enrich, preferable_study_time: e.target.value })} />
@@ -127,7 +139,7 @@ export default function Register() {
               </div>
             )}
 
-            {error && <div className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</div>}
+            {error && <div className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300 light:text-red-700">{error}</div>}
 
             <Button type="submit" disabled={busy} className="w-full">
               {busy ? 'Creating…' : 'Create account'}
@@ -135,8 +147,8 @@ export default function Register() {
           </form>
         </Card>
 
-        <p className="mt-4 text-center text-sm text-slate-400">
-          Already have an account? <Link to="/login" className="text-indigo-300">Sign in</Link>
+        <p className="mt-4 text-center text-sm text-slate-400 light:text-slate-500">
+          Already have an account? <Link to="/login" className="text-indigo-300 light:text-indigo-600">Sign in</Link>
         </p>
       </div>
     </div>

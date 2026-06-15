@@ -1,5 +1,9 @@
 // Small shared UI primitives + importance/quadrant styling helpers.
 import { useState } from 'react';
+import {
+  ClipboardList, CreditCard, FileText, FlaskConical, BarChart3, PenLine,
+  School, Wrench, Briefcase, TrendingDown, Pin, PartyPopper,
+} from 'lucide-react';
 
 // Chip/tag input: type a value and press Enter (or comma) to add it; click × or
 // press Backspace on an empty field to remove. `value` is an array of strings.
@@ -23,11 +27,11 @@ export function TagInput({ value = [], onChange, placeholder = 'Type and press E
   };
 
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2 py-2 focus-within:border-indigo-400">
+    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-2 py-2 focus-within:border-indigo-400 light:border-slate-900/15 light:bg-white">
       {value.map((tag, i) => (
         <span
           key={`${tag}-${i}`}
-          className="inline-flex items-center gap-1 rounded-md bg-indigo-500/20 px-2 py-1 text-xs text-indigo-200"
+          className="inline-flex items-center gap-1 rounded-md bg-indigo-500/20 px-2 py-1 text-xs text-indigo-200 light:bg-indigo-500/15 light:text-indigo-700"
         >
           {tag}
           <button
@@ -46,7 +50,7 @@ export function TagInput({ value = [], onChange, placeholder = 'Type and press E
         onKeyDown={onKeyDown}
         onBlur={() => add(draft)}
         placeholder={value.length ? '' : placeholder}
-        className="min-w-[140px] flex-1 bg-transparent py-1 text-sm text-slate-100 outline-none placeholder:text-slate-500"
+        className="min-w-[140px] flex-1 bg-transparent py-1 text-sm text-slate-100 outline-none placeholder:text-slate-500 light:text-slate-900"
       />
     </div>
   );
@@ -59,10 +63,11 @@ export const IMPORTANCE_STYLES = {
   low: { label: 'LOW', cls: 'bg-slate-500/15 text-slate-300 border-slate-500/30' },
 };
 
+// Event-type → lucide icon component (rendered as <Icon className="…" />).
 export const TYPE_ICONS = {
-  exam: '📝', exam_fee: '💳', assignment: '📄', lab: '🧪', project: '📊',
-  registration: '🖊️', class: '🏫', workshop: '🛠️', placement: '💼',
-  attendance: '📉', notice: '📌', event: '🎉',
+  exam: ClipboardList, exam_fee: CreditCard, assignment: FileText, lab: FlaskConical, project: BarChart3,
+  registration: PenLine, class: School, workshop: Wrench, placement: Briefcase,
+  attendance: TrendingDown, notice: Pin, event: PartyPopper,
 };
 
 export function Badge({ children, className = '' }) {
@@ -80,10 +85,11 @@ export function ImportanceBadge({ importance }) {
 
 export function Button({ children, variant = 'primary', className = '', ...rest }) {
   const variants = {
-    primary: 'bg-indigo-500 hover:bg-indigo-400 text-white',
-    ghost: 'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10',
+    primary: 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-sm shadow-indigo-500/20',
+    ghost:
+      'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 light:bg-slate-900/[0.04] light:hover:bg-slate-900/[0.08] light:text-slate-700 light:border-slate-900/15',
     danger: 'bg-red-500/80 hover:bg-red-500 text-white',
-    success: 'bg-emerald-500 hover:bg-emerald-400 text-white',
+    success: 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-sm shadow-emerald-500/20',
   };
   return (
     <button
@@ -97,14 +103,18 @@ export function Button({ children, variant = 'primary', className = '', ...rest 
 
 export function Card({ children, className = '' }) {
   return (
-    <div className={`rounded-2xl border border-white/10 bg-white/[0.03] p-5 ${className}`}>{children}</div>
+    <div
+      className={`rounded-2xl border border-white/10 bg-white/[0.03] p-5 light:border-slate-900/10 light:bg-white light:shadow-sm light:shadow-slate-900/5 ${className}`}
+    >
+      {children}
+    </div>
   );
 }
 
 export function Field({ label, hint, children }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-sm text-slate-300">{label}</span>
+      <span className="mb-1 block text-sm text-slate-300 light:text-slate-600">{label}</span>
       {children}
       {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
     </label>
@@ -112,7 +122,7 @@ export function Field({ label, hint, children }) {
 }
 
 export const inputCls =
-  'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none focus:border-indigo-400';
+  'w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-100 outline-none focus:border-indigo-400 light:border-slate-900/15 light:bg-white light:text-slate-900 light:placeholder:text-slate-400';
 
 // Human-readable "in 2 days" / "tomorrow 9:00 AM".
 export function formatWhen(datetime) {

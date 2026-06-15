@@ -3,6 +3,8 @@ import { CollegeInfo } from '../models/CollegeInfo.js';
 import { CATEGORIES } from './categories.js';
 import { categorizeEmail } from './categorize.js';
 import { syncDigestItemsToCalendar } from '../calendar/digestCalendar.js';
+import { nextExpiryAt } from './priority.js';
+import { ensureJobEarliest } from '../jobs/schedule.js';
 
 function toDate(value) {
   if (!value) return undefined;
@@ -112,5 +114,19 @@ export async function categorizeAndStore(
   }
 
   if (added) await doc.save();
+
+  // Event-driven expiry: ensure this student's expiry job is scheduled to fire
+  // when its soonest dated item dies. A newly arrived, sooner deadline pulls the
+  // job earlier ($min); nothing here scans other students. No dated items -> let
+  // the job re-check slowly (handler decides) by seeding it shortly ahead.
+  if (added) {
+    try {
+      const due = nextExpiryAt(doc, now) || new Date(now.getTime() + 60 * 60 * 1000);
+      await ensureJobEarliest('digest_expiry', student._id, due);
+    } catch (err) {
+      console.error('[jobs] failed to schedule digest_expiry:', err?.message || err);
+    }
+  }
+
   return { engine, added, by_category: byCategory, calendar_events: calendarEvents };
 }

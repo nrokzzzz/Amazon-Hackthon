@@ -5,6 +5,7 @@ import { Student } from '../models/Student.js';
 import { requireAuth } from '../auth/jwt.js';
 import { getAuthUrl, makeOAuthClient } from './googleClient.js';
 import { syncAllForStudent } from './sync.js';
+import { backfillDigestCalendar } from './digestCalendar.js';
 import { startWatch, stopWatch } from '../gmail/watch.js';
 
 export const calendarRouter = express.Router();
@@ -62,6 +63,15 @@ calendarRouter.get('/auth/google/callback', async (req, res) => {
       } catch (err) {
         console.error('[gmail] auto-watch failed after connect:', err?.message || err);
       }
+    }
+
+    // Backfill the calendar with any dated items captured before connecting, so
+    // everything lands on Google Calendar automatically (best-effort).
+    try {
+      const r = await backfillDigestCalendar(student);
+      if (r.created) console.log(`[calendar] backfilled ${r.created} event(s) on connect for ${student.email}`);
+    } catch (err) {
+      console.error('[calendar] backfill after connect failed:', err?.message || err);
     }
 
     return redirect('connected');

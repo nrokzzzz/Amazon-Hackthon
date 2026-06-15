@@ -10,8 +10,11 @@
     "dev:tunnel": "node src/scripts/tunnel.js",
     "dev:tunnel:mem": "node src/scripts/tunnel.js --mem",
     "start": "node src/server.js",
+    "worker": "node src/jobs/worker.js",
+    "jobs:backfill": "node src/scripts/backfill-jobs.js",
     "smoke": "node src/scripts/smoke.js",
-    "test:http": "node src/scripts/httptest.js"
+    "test:http": "node src/scripts/httptest.js",
+    "test:jobs": "node src/scripts/jobtest.js"
   },
   "dependencies": {
     "@aws-sdk/client-bedrock-runtime": "^3.658.0",

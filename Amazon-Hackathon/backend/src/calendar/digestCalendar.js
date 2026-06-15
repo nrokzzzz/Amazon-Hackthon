@@ -1,4 +1,6 @@
 import { calendarForStudent } from './googleClient.js';
+import { CollegeInfo } from '../models/CollegeInfo.js';
+import { CATEGORIES } from '../digest/categories.js';
 
 // Reminder lead time per category:
 //   exams        -> 2 days before
@@ -74,4 +76,22 @@ export async function syncDigestItemsToCalendar(student, items) {
     }
   }
   return { created };
+}
+
+// Backfill: add every dated, not-yet-synced digest item for a student to their
+// Google Calendar. Called right after the student connects Google so items that
+// were captured *before* connecting also land on the calendar automatically.
+export async function backfillDigestCalendar(student) {
+  if (!student?.gcal?.connected || !student?.gcal?.refresh_token) {
+    return { created: 0, reason: 'not_connected' };
+  }
+  const doc = await CollegeInfo.findOne({ student_id: student._id });
+  if (!doc) return { created: 0 };
+
+  const items = [];
+  for (const cat of CATEGORIES) for (const it of doc[cat] || []) items.push(it);
+
+  const r = await syncDigestItemsToCalendar(student, items); // mutates gcal_event_id in place
+  if (r.created) await doc.save();
+  return r;
 }

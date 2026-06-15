@@ -3,7 +3,6 @@ import { useAuth } from './auth/AuthContext.jsx';
 import Layout from './components/Layout.jsx';
 import Register from './pages/Register.jsx';
 import Login from './pages/Login.jsx';
-import Dashboard from './pages/Dashboard.jsx';
 import Profile from './pages/Profile.jsx';
 import Chat from './pages/Chat.jsx';
 import Tasks from './pages/Tasks.jsx';
@@ -23,10 +22,11 @@ export default function App() {
       <Route path="/login" element={student && !loading ? <Navigate to="/" replace /> : <Login />} />
       <Route path="/register" element={student && !loading ? <Navigate to="/" replace /> : <Register />} />
 
-      <Route path="/" element={<Protected><Dashboard /></Protected>} />
-      <Route path="/tasks" element={<Protected><Tasks /></Protected>} />
+      {/* Today + Priorities are merged into a single "My Tasks" page at "/". */}
+      <Route path="/" element={<Protected><Tasks /></Protected>} />
       <Route path="/chat" element={<Protected><Chat /></Protected>} />
       <Route path="/profile" element={<Protected><Profile /></Protected>} />
+      <Route path="/tasks" element={<Navigate to="/" replace />} />
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

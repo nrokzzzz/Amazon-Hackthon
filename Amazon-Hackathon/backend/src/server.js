@@ -14,8 +14,7 @@ import { digestRouter } from './digest/routes.js';
 import { chatRouter } from './chat/routes.js';
 import { voiceRouter } from './voice/routes.js';
 import { attachVoiceStream } from './voice/stream.js';
-import { startWatchScheduler } from './gmail/scheduler.js';
-import { startPriorityScheduler } from './digest/priorityScheduler.js';
+import { startJobScheduler } from './jobs/scheduler.js';
 
 const app = express();
 
@@ -84,11 +83,11 @@ export async function start() {
   // Live speech-to-text WebSocket proxy (/voice/stream).
   attachVoiceStream(server);
 
-  // Keep Gmail watches alive automatically (no user action needed).
-  if (isGmailConfigured()) startWatchScheduler();
-
-  // Hourly: re-prioritize + drop tasks whose time has passed (per student).
-  startPriorityScheduler();
+  // Job scheduler: processes only due per-student jobs (task expiry, Gmail-watch
+  // renewal) via an indexed due-query + atomic lease — no full-collection scans.
+  // Run it inline for single-node/dev. At scale, set INLINE_JOBS=false on the API
+  // and run dedicated workers (`npm run worker`) so replicas don't duplicate work.
+  if (process.env.INLINE_JOBS !== 'false') startJobScheduler();
 
   return server;
 }

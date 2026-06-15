@@ -1,23 +1,38 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  ArrowUp,
+  BookOpen,
+  Briefcase,
+  Bus,
+  ClipboardList,
+  CreditCard,
+  FileText,
+  Loader2,
+  Mic,
+  Sparkles,
+  Square,
+  Volume2,
+  VolumeX,
+} from 'lucide-react';
 import { api, getToken } from '../api.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 
 const PAGE = 20;
 
 const SUGGESTIONS = [
-  { icon: '📚', text: 'Make me a study plan for my exams' },
-  { icon: '📝', text: 'When is my next exam?' },
-  { icon: '📄', text: 'Any assignment deadlines this week?' },
-  { icon: '💼', text: 'Tell me about upcoming placement drives' },
-  { icon: '💳', text: 'Any fees I need to pay?' },
-  { icon: '🚌', text: 'Did the bus timings change?' },
+  { icon: BookOpen, text: 'Make me a study plan for my exams' },
+  { icon: ClipboardList, text: 'When is my next exam?' },
+  { icon: FileText, text: 'Any assignment deadlines this week?' },
+  { icon: Briefcase, text: 'Tell me about upcoming placement drives' },
+  { icon: CreditCard, text: 'Any fees I need to pay?' },
+  { icon: Bus, text: 'Did the bus timings change?' },
 ];
 
 // Sparkle avatar for the assistant.
 function AssistantAvatar() {
   return (
     <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-sm text-white shadow-lg shadow-indigo-500/20">
-      ✦
+      <Sparkles className="h-4 w-4 text-white" />
     </div>
   );
 }
@@ -39,7 +54,13 @@ function VoiceOrb({ state }) {
       <div
         className={`grid h-32 w-32 place-items-center rounded-full bg-gradient-to-br ${color} text-5xl shadow-2xl ${animate ? 'animate-pulse' : ''}`}
       >
-        {state === 'thinking' ? '🤔' : state === 'speaking' ? '🔊' : '🎙️'}
+        {state === 'thinking' ? (
+          <Loader2 className="h-5 w-5 animate-spin" />
+        ) : state === 'speaking' ? (
+          <Volume2 className="h-5 w-5" />
+        ) : (
+          <Mic className="h-5 w-5" />
+        )}
       </div>
     </div>
   );
@@ -59,13 +80,13 @@ function TypingDots() {
   );
 }
 
-function Message({ role, content, engine }) {
+function Message({ role, content }) {
   // User: subtle right-aligned bubble. Assistant: clean flowing text with the
   // sparkle avatar (Claude-style — no bubble, no user avatar).
   if (role === 'user') {
     return (
       <div className="flex justify-end">
-        <div className="max-w-[80%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-md bg-white/10 px-4 py-2.5 text-[15px] text-slate-100">
+        <div className="max-w-[80%] whitespace-pre-wrap break-words rounded-2xl rounded-tr-md bg-white/10 light:bg-slate-900/[0.06] px-4 py-2.5 text-[15px] text-slate-100 light:text-slate-800">
           {content}
         </div>
       </div>
@@ -75,12 +96,7 @@ function Message({ role, content, engine }) {
     <div className="flex gap-4">
       <AssistantAvatar />
       <div className="min-w-0 flex-1 pt-0.5">
-        <div className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-slate-100">{content}</div>
-        {engine && engine !== 'error' && (
-          <div className="mt-1.5 text-[10px] uppercase tracking-wide text-slate-500">
-            {engine === 'gemini' ? '✦ Gemini' : 'rule-based'}
-          </div>
-        )}
+        <div className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-slate-100 light:text-slate-800">{content}</div>
       </div>
     </div>
   );
@@ -568,7 +584,7 @@ export default function Chat() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-white/10 px-6 py-4">
+      <div className="flex shrink-0 items-center gap-3 border-b border-white/10 light:border-slate-900/10 px-6 py-4">
         <AssistantAvatar />
         <div>
           <div className="text-sm font-semibold">CampusFlow Assistant</div>
@@ -581,7 +597,10 @@ export default function Chat() {
               title="Talk with the assistant (hands-free)"
               className="rounded-lg px-3 py-1.5 text-sm text-indigo-200 transition hover:bg-indigo-500/15"
             >
-              🎙️ Talk
+              <span className="inline-flex items-center gap-1.5">
+                <Mic className="h-4 w-4" />
+                Talk
+              </span>
             </button>
           )}
           {voiceOn && (
@@ -589,16 +608,16 @@ export default function Chat() {
               onClick={() => setSpeakReplies((v) => !v)}
               title={speakReplies ? 'Mute spoken replies' : 'Speak replies aloud'}
               className={`rounded-lg px-2.5 py-1.5 text-sm transition ${
-                speakReplies ? 'bg-indigo-500/20 text-indigo-200' : 'text-slate-400 hover:bg-white/5'
+                speakReplies ? 'bg-indigo-500/20 text-indigo-200' : 'text-slate-400 light:text-slate-500 hover:bg-white/5 light:hover:bg-slate-900/[0.04]'
               }`}
             >
-              {speakReplies ? '🔊' : '🔇'}
+              {speakReplies ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
             </button>
           )}
           {messages.length > 0 && (
             <button
               onClick={clearChat}
-              className="rounded-lg px-3 py-1.5 text-xs text-slate-400 transition hover:bg-white/5 hover:text-slate-200"
+              className="rounded-lg px-3 py-1.5 text-xs text-slate-400 light:text-slate-500 transition hover:bg-white/5 light:hover:bg-slate-900/[0.04] hover:text-slate-200 light:hover:text-slate-800"
             >
               Clear chat
             </button>
@@ -611,10 +630,10 @@ export default function Chat() {
         {empty ? (
           <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center px-6 text-center">
             <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-2xl text-white shadow-xl shadow-indigo-500/30">
-              ✦
+              <Sparkles className="h-4 w-4 text-white" />
             </div>
             <h1 className="text-2xl font-bold">How can I help, {student?.name?.split(' ')[0] || 'there'}?</h1>
-            <p className="mt-2 text-sm text-slate-400">
+            <p className="mt-2 text-sm text-slate-400 light:text-slate-500">
               I answer from the college emails &amp; notices in your account.
             </p>
             <div className="mt-8 grid w-full grid-cols-1 gap-2 sm:grid-cols-2">
@@ -622,9 +641,9 @@ export default function Chat() {
                 <button
                   key={s.text}
                   onClick={() => send(s.text)}
-                  className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-3 text-left text-sm text-slate-200 transition hover:border-indigo-400/40 hover:bg-white/[0.06]"
+                  className="flex items-center gap-3 rounded-xl border border-white/10 light:border-slate-900/10 bg-white/[0.03] light:bg-white light:shadow-sm px-4 py-3 text-left text-sm text-slate-200 light:text-slate-800 transition hover:border-indigo-400/40 hover:bg-white/[0.06] light:hover:bg-slate-900/[0.06]"
                 >
-                  <span>{s.icon}</span>
+                  <s.icon className="h-4 w-4" />
                   <span>{s.text}</span>
                 </button>
               ))}
@@ -649,7 +668,7 @@ export default function Chat() {
             {busy && (
               <div className="flex gap-4">
                 <AssistantAvatar />
-                <div className="rounded-2xl rounded-tl-sm bg-white/[0.04] px-4 py-2.5">
+                <div className="rounded-2xl rounded-tl-sm bg-white/[0.04] light:bg-white light:shadow-sm px-4 py-2.5">
                   <TypingDots />
                 </div>
               </div>
@@ -661,9 +680,9 @@ export default function Chat() {
       {/* Composer */}
       <div className="relative shrink-0 px-6 pb-4 pt-2">
         {/* soft fade so messages scroll under the composer (Claude-style) */}
-        <div className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-[#0b0f1a] to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-[#0b0f1a] light:from-white to-transparent" />
         <div className="mx-auto max-w-3xl">
-          <div className="flex items-end gap-2 rounded-3xl border border-white/10 bg-white/[0.05] px-3 py-2 shadow-lg shadow-black/20 focus-within:border-indigo-400/60">
+          <div className="flex items-end gap-2 rounded-3xl border border-white/10 light:border-slate-900/10 bg-white/[0.05] light:bg-slate-900/[0.04] px-3 py-2 shadow-lg shadow-black/20 focus-within:border-indigo-400/60">
             {voiceOn && (
               <button
                 onClick={toggleRecording}
@@ -671,10 +690,10 @@ export default function Chat() {
                 title={recording ? 'Stop dictation' : 'Dictate (live speech-to-text)'}
                 aria-label={recording ? 'Stop dictation' : 'Start dictation'}
                 className={`grid h-9 w-9 shrink-0 place-items-center rounded-full text-base transition disabled:opacity-50 ${
-                  recording ? 'animate-pulse bg-red-500 text-white' : 'bg-white/10 text-slate-300 hover:bg-white/20'
+                  recording ? 'animate-pulse bg-red-500 text-white' : 'bg-white/10 light:bg-slate-900/[0.06] text-slate-300 light:text-slate-600 hover:bg-white/20'
                 }`}
               >
-                {recording ? '⏹' : '🎤'}
+                {recording ? <Square className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
               </button>
             )}
             <textarea
@@ -683,8 +702,8 @@ export default function Chat() {
               value={input}
               onChange={handleInputChange}
               onKeyDown={onKeyDown}
-              placeholder={recording ? 'Listening… speak now, tap ⏹ to stop' : 'Message CampusFlow Assistant…'}
-              className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-slate-100 outline-none placeholder:text-slate-500"
+              placeholder={recording ? 'Listening… speak now, tap stop to end' : 'Message CampusFlow Assistant…'}
+              className="max-h-[200px] flex-1 resize-none bg-transparent px-2 py-1.5 text-sm text-slate-100 light:text-slate-800 outline-none placeholder:text-slate-500"
             />
             <button
               onClick={() => send()}
@@ -692,21 +711,21 @@ export default function Chat() {
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-indigo-500 text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Send"
             >
-              ↑
+              <ArrowUp className="h-5 w-5" />
             </button>
           </div>
           <p className="mt-2 text-center text-[11px] text-slate-600">
-            {voiceOn ? 'Enter to send · Shift+Enter for newline · 🎤 to speak' : 'Enter to send · Shift+Enter for a new line'}
+            {voiceOn ? 'Enter to send · Shift+Enter for newline · use the mic to speak' : 'Enter to send · Shift+Enter for a new line'}
           </p>
         </div>
       </div>
 
       {/* Hands-free conversation overlay */}
       {voiceMode && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[#0b0f1a]/95 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[#0b0f1a]/95 light:bg-white/95 backdrop-blur-sm">
           <VoiceOrb state={voiceState} />
           <div className="text-center">
-            <div className="text-xl font-semibold text-slate-100">
+            <div className="text-xl font-semibold text-slate-100 light:text-slate-800">
               {voiceState === 'listening'
                 ? 'Listening…'
                 : voiceState === 'thinking'

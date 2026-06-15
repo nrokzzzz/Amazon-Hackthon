@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { Button, Card, Field, Badge, TagInput, inputCls } from '../ui.jsx';
+import { Check, AlertTriangle, Zap } from 'lucide-react';
 
 // --- Google account / email-capture connection card -----------------------
 function GoogleAccountCard() {
@@ -24,8 +25,8 @@ function GoogleAccountCard() {
     load();
     // Handle the OAuth callback redirect (?gcal=connected|error).
     const gcal = params.get('gcal');
-    if (gcal === 'connected') setMsg('✅ Google account connected — now auto-importing college emails.');
-    if (gcal === 'error') setMsg('⚠️ Connection failed. Check the Google credentials and try again.');
+    if (gcal === 'connected') setMsg('Google account connected — now auto-importing college emails.');
+    if (gcal === 'error') setMsg('Connection failed. Check the Google credentials and try again.');
     if (gcal) {
       params.delete('gcal');
       setParams(params, { replace: true });
@@ -43,7 +44,7 @@ function GoogleAccountCard() {
       const e = err?.response?.data;
       setMsg(
         e?.error === 'google_not_configured'
-          ? '⚙️ Google OAuth is not configured on the server.'
+          ? 'Google OAuth is not configured on the server.'
           : 'Could not start the Google connection.'
       );
       setBusy(false);
@@ -70,7 +71,7 @@ function GoogleAccountCard() {
     setMsg('');
     try {
       await api.post('/gmail/watch');
-      setMsg('📨 Watching your inbox — college emails will be captured automatically.');
+      setMsg('Watching your inbox — college emails will be captured automatically.');
       await load();
     } catch (err) {
       setMsg(err?.response?.data?.message || 'Could not start email capture.');
@@ -88,7 +89,7 @@ function GoogleAccountCard() {
       <div className="flex items-start justify-between">
         <div>
           <div className="font-medium">Google Account</div>
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-slate-400 light:text-slate-500">
             Connect once to auto-import college emails (and sync your calendar).
           </div>
         </div>
@@ -101,29 +102,29 @@ function GoogleAccountCard() {
 
       {connected ? (
         <>
-          <div className="rounded-lg bg-white/5 px-4 py-3 text-sm">
-            <div className="text-slate-200">{st.email || 'Google account'}</div>
+          <div className="rounded-lg bg-white/5 light:bg-slate-900/[0.04] px-4 py-3 text-sm">
+            <div className="text-slate-200 light:text-slate-800">{st.email || 'Google account'}</div>
             <div className="mt-2 flex flex-wrap gap-2">
               <Badge className={st.calendar_connected ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-slate-500/15 text-slate-300 border-slate-500/30'}>
-                {st.calendar_connected ? '✓ Calendar' : 'Calendar off'}
+                {st.calendar_connected ? <span className="inline-flex items-center gap-1"><Check className="h-3.5 w-3.5" />Calendar</span> : 'Calendar off'}
               </Badge>
               <Badge className={watching ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30'}>
-                {watching ? '✓ Email capture active' : '⚠ Email capture off'}
+                {watching ? <span className="inline-flex items-center gap-1"><Check className="h-3.5 w-3.5" />Email capture active</span> : <span className="inline-flex items-center gap-1"><AlertTriangle className="h-3.5 w-3.5" />Email capture off</span>}
               </Badge>
             </div>
             {senders.length > 0 && (
               <div className="mt-3 text-xs text-slate-500">
-                Importing emails from: <span className="text-slate-300">{senders.join(', ')}</span>
+                Importing emails from: <span className="text-slate-300 light:text-slate-600">{senders.join(', ')}</span>
               </div>
             )}
           </div>
 
-          <div className="flex items-start gap-2 rounded-lg bg-indigo-500/5 px-3 py-2 text-xs text-slate-400">
-            <span>⚡</span>
+          <div className="flex items-start gap-2 rounded-lg bg-indigo-500/5 px-3 py-2 text-xs text-slate-400 light:text-slate-500">
+            <Zap className="h-4 w-4" />
             <span>
               Calendar reminders are set automatically when emails arrive —{' '}
-              <span className="text-slate-300">exams 2 days before</span>,{' '}
-              <span className="text-slate-300">placements &amp; deadlines 1 day before</span>. No syncing needed.
+              <span className="text-slate-300 light:text-slate-600">exams 2 days before</span>,{' '}
+              <span className="text-slate-300 light:text-slate-600">placements &amp; deadlines 1 day before</span>. No syncing needed.
             </span>
           </div>
 
@@ -149,7 +150,7 @@ function GoogleAccountCard() {
         </div>
       )}
 
-      {msg && <div className="rounded-lg bg-white/5 px-4 py-3 text-sm text-slate-200">{msg}</div>}
+      {msg && <div className="rounded-lg bg-white/5 light:bg-slate-900/[0.04] px-4 py-3 text-sm text-slate-200 light:text-slate-800">{msg}</div>}
     </Card>
   );
 }
@@ -197,7 +198,7 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-2xl p-4 sm:p-8">
       <h1 className="text-xl font-bold sm:text-2xl">Profile</h1>
-      <p className="mt-1 text-slate-400">Private to you. Powers matching and personalization.</p>
+      <p className="mt-1 text-slate-400 light:text-slate-500">Private to you. Powers matching and personalization.</p>
 
       {/* Google account connection (email import + calendar) */}
       <div className="mt-6">
@@ -215,7 +216,7 @@ export default function Profile() {
           </div>
         </div>
 
-        <hr className="border-white/10" />
+        <hr className="border-white/10 light:border-slate-900/10" />
 
         <Field label="Section">
           <input className={inputCls} value={form.section} onChange={(e) => setForm({ ...form, section: e.target.value })} placeholder="A" />
@@ -235,7 +236,7 @@ export default function Profile() {
 
         <div className="flex items-center gap-3">
           <Button onClick={save} disabled={busy}>{busy ? 'Saving…' : 'Save'}</Button>
-          {msg && <span className="text-sm text-slate-400">{msg}</span>}
+          {msg && <span className="text-sm text-slate-400 light:text-slate-500">{msg}</span>}
         </div>
       </Card>
     </div>

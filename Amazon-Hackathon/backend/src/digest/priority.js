@@ -46,6 +46,27 @@ export function isLive(item, now = new Date()) {
   return now.getTime() <= end;
 }
 
+// The soonest instant at which some dated item in this doc will expire (the end
+// of its IST day), strictly after `now` — i.e. when the expiry job next needs to
+// run for this student. null when nothing dated remains, so the caller can fall
+// back to a slow re-check instead of running hourly for no reason.
+export function nextExpiryAt(doc, now = new Date()) {
+  if (!doc) return null;
+  const t = now.getTime();
+  let soonest = null;
+  for (const cat of CATEGORIES) {
+    const arr = doc[cat];
+    if (!Array.isArray(arr)) continue;
+    for (const it of arr) {
+      if (!it?.datetime) continue;
+      const end = endOfIstDay(it.datetime);
+      if (end == null || end <= t) continue; // already dead or undatable
+      if (soonest == null || end < soonest) soonest = end;
+    }
+  }
+  return soonest == null ? null : new Date(soonest);
+}
+
 // Remove dead (past-day) dated items from a CollegeInfo doc IN PLACE.
 // Returns how many were removed. Undated items are kept.
 export function expireDigest(doc, now = new Date()) {
