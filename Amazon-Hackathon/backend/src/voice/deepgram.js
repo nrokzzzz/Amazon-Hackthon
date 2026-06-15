@@ -9,6 +9,7 @@ export async function transcribe(buffer, contentType = 'audio/webm') {
 
   const params = new URLSearchParams({
     model: config.deepgram.sttModel,
+
     smart_format: 'true',
     punctuate: 'true',
   });

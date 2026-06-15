@@ -15,19 +15,26 @@ export function attachVoiceStream(server) {
   const wss = new WebSocketServer({ server, path: '/voice/stream' });
 
   wss.on('connection', (client, req) => {
+    const url = new URL(req.url, 'http://localhost');
     // Authenticate via ?token=<app JWT> (browsers can't set WS headers).
     try {
-      const url = new URL(req.url, 'http://localhost');
       jwt.verify(url.searchParams.get('token') || '', config.jwtSecret);
     } catch {
       client.close(1008, 'unauthorized');
       return;
     }
 
+    // The browser records at its AudioContext rate (often 44.1/48 kHz even when
+    // 16 kHz is requested) and sends it as ?rate=. Tell Deepgram the REAL rate —
+    // a mismatch here makes transcripts come back garbled or empty.
+    const rate = String(
+      Math.min(48000, Math.max(8000, parseInt(url.searchParams.get('rate'), 10) || 16000))
+    );
+
     const params = new URLSearchParams({
       model: config.deepgram.sttModel,
       encoding: 'linear16',
-      sample_rate: '16000',
+      sample_rate: rate,
       channels: '1',
       interim_results: 'true',
       smart_format: 'true',

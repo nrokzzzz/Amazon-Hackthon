@@ -55,11 +55,21 @@ const { config } = await import('../config/env.js');
 try {
   await start();
 } catch (err) {
-  console.error('\n[tunnel] backend failed to start:', err?.message || err);
-  if (!useMem && /ECONNREFUSED|ServerSelection/i.test(String(err?.message || err))) {
+  const msg = String(err?.message || err);
+  console.error('\n[tunnel] backend failed to start:', msg);
+  if (!useMem && /querySrv|ENOTFOUND|EAI_AGAIN/i.test(msg)) {
     console.error(
-      '         MongoDB is not reachable. Either start MongoDB, or run a zero-setup\n' +
-        '         in-memory DB instead:  npm run dev:tunnel:mem\n'
+      '         Could not resolve the Atlas SRV DNS record (mongodb+srv://). Your\n' +
+        '         network/DNS is refusing SRV lookups (not an Atlas/auth problem). Try:\n' +
+        '           - Switch DNS to 8.8.8.8 / 1.1.1.1 (or turn off VPN), then retry\n' +
+        '           - Use the non-SRV string from Atlas: Connect -> Drivers ->\n' +
+        '             mongodb://host1,host2,host3/?ssl=true&replicaSet=...&authSource=admin\n' +
+        '           - Run a zero-setup local DB:  npm run dev:tunnel:mem\n'
+    );
+  } else if (!useMem && /ECONNREFUSED|ServerSelection|timed out/i.test(msg)) {
+    console.error(
+      '         MongoDB is not reachable. If using Atlas, allow your IP under Network\n' +
+        '         Access; or run a zero-setup in-memory DB:  npm run dev:tunnel:mem\n'
     );
   }
   process.exit(1);

@@ -122,6 +122,7 @@ export default function Chat() {
   // Hands-free conversation mode
   const [voiceMode, setVoiceMode] = useState(false);
   const [voiceState, setVoiceState] = useState('idle'); // idle | listening | thinking | speaking
+  const [voiceErr, setVoiceErr] = useState(''); // surfaced voice failure (so it isn't silent)
 
   const scrollRef = useRef(null);
   const taRef = useRef(null);
@@ -235,7 +236,7 @@ export default function Chat() {
       audio.onended = () => URL.revokeObjectURL(url);
       await audio.play();
     } catch {
-      /* ignore playback errors */
+      setVoiceErr('Could not play the spoken reply — the voice service is unavailable (check the Deepgram API key).');
     }
   }
 
@@ -245,6 +246,7 @@ export default function Chat() {
   async function startRecording() {
     const token = getToken();
     if (!token) return;
+    setVoiceErr('');
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       micStreamRef.current = stream;
@@ -258,10 +260,19 @@ export default function Chat() {
       const mute = ctx.createGain();
       mute.gain.value = 0; // process audio without echoing it to the speakers
 
-      const wsBase = import.meta.env.VITE_WS_BASE_URL || 'ws://localhost:4000';
-      const ws = new WebSocket(`${wsBase}/voice/stream?token=${encodeURIComponent(token)}`);
+      // Derive the WS origin from the API base so live dictation works wherever
+      // the API does — e.g. over ngrok/https it becomes wss://. VITE_WS_BASE_URL
+      // still overrides if you need a custom host.
+      const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000';
+      const wsBase = import.meta.env.VITE_WS_BASE_URL || apiBase.replace(/^http/i, 'ws');
+      // Pass the context's ACTUAL sample rate so the backend tells Deepgram the
+      // truth (browsers often ignore the requested 16 kHz and record at 48 kHz).
+      const ws = new WebSocket(
+        `${wsBase}/voice/stream?token=${encodeURIComponent(token)}&rate=${ctx.sampleRate}`
+      );
       ws.binaryType = 'arraybuffer';
       wsRef.current = ws;
+      ws.onerror = () => setVoiceErr('Live dictation failed — the voice service is unavailable (check the Deepgram API key).');
 
       // Text already in the box stays as a prefix; finals accumulate after it.
       dictationPrefixRef.current = input.trim() ? `${input.trim()} ` : '';
@@ -402,7 +413,10 @@ export default function Chat() {
     return api
       .post('/voice/transcribe', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
       .then(({ data }) => (data.transcript || '').trim())
-      .catch(() => '');
+      .catch(() => {
+        setVoiceErr('Could not transcribe your speech — the voice service is unavailable (check the Deepgram API key).');
+        return '';
+      });
   }
 
   // Play TTS for `text`; resolves when playback ends (or is stopped).
@@ -424,7 +438,10 @@ export default function Chat() {
           audio.onpause = done; // stopVoiceMode pauses -> unblock the loop
           return audio.play();
         })
-        .catch(() => resolve());
+        .catch(() => {
+          setVoiceErr('Could not play the spoken reply — the voice service is unavailable (check the Deepgram API key).');
+          resolve();
+        });
     });
   }
 
@@ -519,6 +536,7 @@ export default function Chat() {
 
   function startVoiceMode() {
     if (!voiceOn || voiceMode) return;
+    setVoiceErr('');
     voiceModeRef.current = true;
     setVoiceMode(true);
     runVoiceLoop();
@@ -682,6 +700,14 @@ export default function Chat() {
         {/* soft fade so messages scroll under the composer (Claude-style) */}
         <div className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-[#0b0f1a] light:from-white to-transparent" />
         <div className="mx-auto max-w-3xl">
+          {voiceErr && (
+            <div className="mb-2 flex items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-200 light:text-red-700">
+              <span>{voiceErr}</span>
+              <button onClick={() => setVoiceErr('')} className="shrink-0 font-medium opacity-70 transition hover:opacity-100" aria-label="Dismiss">
+                Dismiss
+              </button>
+            </div>
+          )}
           <div className="flex items-end gap-2 rounded-3xl border border-white/10 light:border-slate-900/10 bg-white/[0.05] light:bg-slate-900/[0.04] px-3 py-2 shadow-lg shadow-black/20 focus-within:border-indigo-400/60">
             {voiceOn && (
               <button
