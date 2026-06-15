@@ -28,8 +28,8 @@ export default function Layout({ children }) {
     // while every other page scrolls inside <main>.
     <div className="flex h-screen flex-col overflow-hidden">
       <header className="shrink-0 border-b border-white/10 bg-[#0b0f1a]/95 backdrop-blur light:border-slate-900/10 light:bg-white/90">
-        {/* Brand + account row */}
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
+        {/* Single row: brand (left) · tabs (center) · theme + account (right) */}
+        <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-2.5">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 shadow-lg shadow-indigo-500/20">
               <GraduationCap className="h-5 w-5 text-white" />
@@ -41,6 +41,27 @@ export default function Layout({ children }) {
               <div className="hidden text-[11px] text-slate-500 sm:block">your academic chief-of-staff</div>
             </div>
           </div>
+
+          {/* Tabs — centered between the brand and the account menu. */}
+          <nav className="flex flex-1 items-center justify-center gap-1 overflow-x-auto">
+            {NAV.map((n) => (
+              <NavLink
+                key={n.to}
+                to={n.to}
+                end={n.end}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition ${
+                    isActive
+                      ? 'bg-indigo-500/20 text-white light:bg-indigo-500/15 light:text-indigo-700'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 light:text-slate-500 light:hover:bg-slate-900/[0.04] light:hover:text-slate-700'
+                  }`
+                }
+              >
+                <n.Icon className="h-4 w-4" />
+                {n.label}
+              </NavLink>
+            ))}
+          </nav>
 
           <div className="flex items-center gap-2">
             {/* Theme toggle */}
@@ -104,29 +125,6 @@ export default function Layout({ children }) {
               )}
             </div>
           </div>
-        </div>
-
-        {/* Horizontal tabs — each routes to its page; the active tab is underlined. */}
-        <div className="mx-auto w-full max-w-7xl px-2 sm:px-4">
-          <nav className="-mb-px flex gap-1 overflow-x-auto">
-            {NAV.map((n) => (
-              <NavLink
-                key={n.to}
-                to={n.to}
-                end={n.end}
-                className={({ isActive }) =>
-                  `flex items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition ${
-                    isActive
-                      ? 'border-indigo-400 text-white light:text-slate-900'
-                      : 'border-transparent text-slate-400 hover:border-white/20 hover:text-slate-200 light:hover:border-slate-900/20 light:hover:text-slate-700'
-                  }`
-                }
-              >
-                <n.Icon className="h-4 w-4" />
-                {n.label}
-              </NavLink>
-            ))}
-          </nav>
         </div>
       </header>
 
