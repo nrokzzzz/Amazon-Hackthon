@@ -682,22 +682,22 @@ export default function Chat() {
   return (
     <div className="flex h-full flex-col overflow-hidden">
       {/* Header */}
-      <div className="flex shrink-0 items-center gap-3 border-b border-white/10 light:border-slate-900/10 px-6 py-4">
+      <div className="flex shrink-0 items-center gap-3 border-b border-white/10 light:border-slate-900/10 px-4 py-3 sm:px-6 sm:py-4">
         <AssistantAvatar />
-        <div>
-          <div className="text-sm font-semibold">CampusFlow Assistant</div>
-          <div className="text-xs text-slate-500">Ask about your exams, deadlines, placements & more</div>
+        <div className="min-w-0">
+          <div className="truncate text-sm font-semibold">CampusFlow Assistant</div>
+          <div className="hidden truncate text-xs text-slate-500 sm:block">Ask about your exams, deadlines, placements & more</div>
         </div>
-        <div className="ml-auto flex items-center gap-1">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           {voiceOn && (
             <button
               onClick={startVoiceMode}
               title="Talk with the assistant (hands-free)"
-              className="rounded-lg px-3 py-1.5 text-sm text-indigo-200 transition hover:bg-indigo-500/15"
+              className="rounded-lg px-2.5 py-1.5 text-sm text-indigo-200 transition hover:bg-indigo-500/15 sm:px-3"
             >
               <span className="inline-flex items-center gap-1.5">
                 <Mic className="h-4 w-4" />
-                Talk
+                <span className="hidden sm:inline">Talk</span>
               </span>
             </button>
           )}
@@ -726,7 +726,7 @@ export default function Chat() {
       {/* Messages */}
       <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto">
         {empty ? (
-          <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center px-6 text-center">
+          <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center px-4 text-center sm:px-6">
             <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-2xl text-[#101820] shadow-xl shadow-indigo-500/30">
               <Sparkles className="h-4 w-4 text-[#101820]" />
             </div>
@@ -748,7 +748,7 @@ export default function Chat() {
             </div>
           </div>
         ) : (
-          <div className="mx-auto max-w-3xl space-y-6 px-6 py-8">
+          <div className="mx-auto max-w-3xl space-y-6 px-4 py-6 sm:px-6 sm:py-8">
             {loadingOlder && (
               <div className="flex justify-center py-1 text-xs text-slate-500">
                 <span className="inline-flex items-center gap-2">
@@ -776,7 +776,7 @@ export default function Chat() {
       </div>
 
       {/* Composer */}
-      <div className="relative shrink-0 px-6 pb-4 pt-2">
+      <div className="relative shrink-0 px-4 pb-4 pt-2 sm:px-6">
         {/* soft fade so messages scroll under the composer (Claude-style) */}
         <div className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-[#101820] light:from-white to-transparent" />
         <div className="mx-auto max-w-3xl">

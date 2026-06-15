@@ -206,7 +206,7 @@ export default function Profile() {
       </div>
 
       <Card className="mt-4 space-y-4">
-        <div className="grid grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 gap-4 text-sm sm:grid-cols-2">
           <div><span className="text-slate-500">Name</span><div>{student.name}</div></div>
           <div><span className="text-slate-500">Roll no</span><div>{student.roll_no}</div></div>
           <div><span className="text-slate-500">Branch</span><div>{student.branch}</div></div>

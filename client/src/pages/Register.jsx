@@ -102,7 +102,7 @@ export default function Register() {
 
         <Card>
           <form onSubmit={submit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Full name">
                 <input className={inputCls} value={form.name} onChange={set('name')} required />
               </Field>
@@ -118,7 +118,7 @@ export default function Register() {
               <input type="password" className={inputCls} value={form.password} onChange={set('password')} required />
             </Field>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <Field label="Branch">
                 <select className={inputCls} value={form.branch} onChange={set('branch')}>
                   {BRANCHES.map((b) => (
