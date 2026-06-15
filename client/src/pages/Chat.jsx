@@ -136,6 +136,30 @@ function Markdown({ children }) {
   );
 }
 
+// Flatten markdown to plain speech text so the TTS voice doesn't read symbols
+// aloud (e.g. "asterisk asterisk", "hash"). Used only for spoken replies.
+function stripMarkdown(md = '') {
+  return String(md)
+    .replace(/```[\s\S]*?```/g, ' ') // fenced code blocks
+    .replace(/`([^`]+)`/g, '$1') // inline code
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ') // images
+    .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1') // links -> link text
+    .replace(/^\s{0,3}#{1,6}\s+/gm, '') // headings
+    .replace(/^\s{0,3}>\s?/gm, '') // blockquotes
+    .replace(/^\s*([-*_]\s*){3,}$/gm, '') // horizontal rules
+    .replace(/^\s*[-*+]\s+/gm, '') // bullet markers
+    .replace(/^\s*\d+\.\s+/gm, '') // numbered markers
+    .replace(/(\*\*|__)(.*?)\1/g, '$2') // bold
+    .replace(/(\*|_)(.*?)\1/g, '$2') // italic
+    .replace(/~~(.*?)~~/g, '$1') // strikethrough
+    .replace(/\|/g, ' ') // table pipes
+    .replace(/\r/g, '')
+    .replace(/\n{2,}/g, '. ') // paragraph breaks -> a spoken pause
+    .replace(/\n/g, ' ')
+    .replace(/[ \t]{2,}/g, ' ')
+    .trim();
+}
+
 function Message({ role, content }) {
   // User: subtle right-aligned bubble. Assistant: clean flowing text with the
   // sparkle avatar (Claude-style — no bubble, no user avatar).
@@ -285,7 +309,7 @@ export default function Chat() {
         audioRef.current.pause();
         audioRef.current = null;
       }
-      const res = await api.post('/voice/speak', { text: text.slice(0, 1900) }, { responseType: 'blob' });
+      const res = await api.post('/voice/speak', { text: stripMarkdown(text).slice(0, 1900) }, { responseType: 'blob' });
       const url = URL.createObjectURL(res.data);
       const audio = new Audio(url);
       audioRef.current = audio;
@@ -480,7 +504,7 @@ export default function Chat() {
     return new Promise((resolve) => {
       if (!text) return resolve();
       api
-        .post('/voice/speak', { text: text.slice(0, 1900) }, { responseType: 'blob' })
+        .post('/voice/speak', { text: stripMarkdown(text).slice(0, 1900) }, { responseType: 'blob' })
         .then((res) => {
           const url = URL.createObjectURL(res.data);
           const audio = new Audio(url);
