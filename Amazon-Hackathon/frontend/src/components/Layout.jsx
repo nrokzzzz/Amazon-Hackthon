@@ -27,18 +27,21 @@ export default function Layout({ children }) {
     // Fixed-height column so the Assistant page can own its own scroll (h-full),
     // while every other page scrolls inside <main>.
     <div className="flex h-screen flex-col overflow-hidden">
-      <header className="shrink-0 border-b border-white/10 bg-[#0b0f1a]/95 backdrop-blur light:border-slate-900/10 light:bg-white/90">
+      <header className="shrink-0 border-b border-white/10 bg-[#101820]/95 backdrop-blur light:border-slate-900/10 light:bg-white/90">
         {/* Single row: brand (left) · tabs (center) · theme + account (right) */}
         <div className="mx-auto flex w-full max-w-7xl items-center gap-4 px-4 py-3 sm:px-6">
           <div className="flex items-center gap-2.5">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 shadow-lg shadow-indigo-500/20">
-              <GraduationCap className="h-5 w-5 text-white" />
+              <GraduationCap className="h-5 w-5 text-[#101820]" />
             </div>
             <div className="leading-tight">
-              <div className="text-lg font-bold tracking-tight">
-                Campus<span className="text-indigo-400">Flow</span>
+              <div className="text-3xl font-bold tracking-tight">
+                Campus<span className="text-indigo-500">Flow</span>
               </div>
-              <div className="hidden text-[11px] text-slate-500 sm:block">your academic chief-of-staff</div>
+              <div className="hidden max-w-[16rem] text-[11px] leading-snug text-slate-500 lg:block">
+                Personalized Campus Advisor for Priority
+                <br className="hidden xl:block" /> Notifications &amp; Student Support at Scale
+              </div>
             </div>
           </div>
 
@@ -50,10 +53,9 @@ export default function Layout({ children }) {
                 to={n.to}
                 end={n.end}
                 className={({ isActive }) =>
-                  `flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition ${
-                    isActive
-                      ? 'bg-indigo-500/20 text-white light:bg-indigo-500/15 light:text-indigo-700'
-                      : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 light:text-slate-500 light:hover:bg-slate-900/[0.04] light:hover:text-slate-700'
+                  `flex items-center gap-2 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition ${isActive
+                    ? 'bg-indigo-500/20 text-white light:bg-indigo-500/15 light:text-indigo-700'
+                    : 'text-slate-400 hover:bg-white/5 hover:text-slate-200 light:text-slate-500 light:hover:bg-slate-900/[0.04] light:hover:text-slate-700'
                   }`
                 }
               >
@@ -93,7 +95,7 @@ export default function Layout({ children }) {
                 <>
                   {/* Click-away backdrop */}
                   <div className="fixed inset-0 z-30" onClick={() => setMenuOpen(false)} aria-hidden />
-                  <div className="absolute right-0 z-40 mt-2 w-60 overflow-hidden rounded-xl border border-white/10 bg-[#0b0f1a] shadow-xl shadow-black/40 light:border-slate-900/10 light:bg-white light:shadow-slate-900/10">
+                  <div className="absolute right-0 z-40 mt-2 w-60 overflow-hidden rounded-xl border border-white/10 bg-[#101820] shadow-xl shadow-black/40 light:border-slate-900/10 light:bg-white light:shadow-slate-900/10">
                     {student && (
                       <div className="border-b border-white/10 px-4 py-3 light:border-slate-900/10">
                         <div className="text-sm font-medium text-slate-100 light:text-slate-800">{student.name}</div>

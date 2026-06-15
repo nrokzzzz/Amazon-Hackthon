@@ -5,9 +5,39 @@
    dark utility as-is and layer `light:` overrides on top, so dark never regresses. */
 @custom-variant light (&:where(.light, .light *));
 
+/* Brand palette — primary #101820 (deep navy) and secondary #F2AA4C (gold).
+   The UI was built on `indigo`/`fuchsia` accents, so we remap those color
+   tokens to a gold scale: every existing utility recolors at once, no need to
+   touch each component. Content text sizes are also nudged up slightly. */
+@theme {
+  /* Secondary (gold) mapped onto the indigo scale used across the app. */
+  --color-indigo-50: #fdf6ec;
+  --color-indigo-100: #f9e7c7;
+  --color-indigo-200: #f6d9a3;
+  --color-indigo-300: #f4c878;
+  --color-indigo-400: #f3b85f;
+  --color-indigo-500: #f2aa4c;
+  --color-indigo-600: #d98e2f;
+  --color-indigo-700: #b06e22;
+  --color-indigo-800: #8a551f;
+  --color-indigo-900: #70461e;
+  --color-indigo-950: #422607;
+
+  /* Gradient companions remap to the same gold family. */
+  --color-fuchsia-400: #f3b85f;
+  --color-fuchsia-500: #e89a3c;
+
+  /* Slightly larger content text. */
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+}
+
 :root {
   color-scheme: dark;
-  --cf-bg: #0b0f1a;
+  --cf-primary: #101820;
+  --cf-secondary: #f2aa4c;
+  --cf-bg: #101820;
   --cf-text: #e6e9f0;
 }
 

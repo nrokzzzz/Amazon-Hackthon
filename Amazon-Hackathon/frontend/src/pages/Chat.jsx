@@ -14,6 +14,8 @@ import {
   Volume2,
   VolumeX,
 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { api, getToken } from '../api.js';
 import { useAuth } from '../auth/AuthContext.jsx';
 
@@ -31,8 +33,8 @@ const SUGGESTIONS = [
 // Sparkle avatar for the assistant.
 function AssistantAvatar() {
   return (
-    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-sm text-white shadow-lg shadow-indigo-500/20">
-      <Sparkles className="h-4 w-4 text-white" />
+    <div className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-sm text-[#101820] shadow-lg shadow-indigo-500/20">
+      <Sparkles className="h-4 w-4 text-[#101820]" />
     </div>
   );
 }
@@ -80,6 +82,60 @@ function TypingDots() {
   );
 }
 
+// Tailwind-styled markdown for assistant replies — Gemini returns **bold**,
+// lists, links, tables, etc., which would otherwise show as raw symbols.
+const MD_COMPONENTS = {
+  p: ({ children }) => <p className="mb-2 leading-relaxed last:mb-0">{children}</p>,
+  strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+  em: ({ children }) => <em className="italic">{children}</em>,
+  ul: ({ children }) => <ul className="mb-2 ml-5 list-disc space-y-1 last:mb-0">{children}</ul>,
+  ol: ({ children }) => <ol className="mb-2 ml-5 list-decimal space-y-1 last:mb-0">{children}</ol>,
+  li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+  a: ({ children, href }) => (
+    <a
+      href={href}
+      target="_blank"
+      rel="noreferrer"
+      className="text-indigo-300 underline underline-offset-2 hover:text-indigo-200 light:text-indigo-600"
+    >
+      {children}
+    </a>
+  ),
+  code: ({ className, children }) =>
+    /\blanguage-/.test(className || '') ? (
+      <code className={className}>{children}</code>
+    ) : (
+      <code className="rounded bg-white/10 px-1 py-0.5 text-[0.85em] light:bg-slate-900/10">{children}</code>
+    ),
+  pre: ({ children }) => (
+    <pre className="mb-2 overflow-x-auto rounded-lg bg-black/30 p-3 text-[13px] last:mb-0 light:bg-slate-900/[0.06]">{children}</pre>
+  ),
+  h1: ({ children }) => <h1 className="mb-2 mt-1 text-lg font-bold">{children}</h1>,
+  h2: ({ children }) => <h2 className="mb-2 mt-1 text-base font-bold">{children}</h2>,
+  h3: ({ children }) => <h3 className="mb-1 mt-1 font-semibold">{children}</h3>,
+  blockquote: ({ children }) => (
+    <blockquote className="my-2 border-l-2 border-white/20 pl-3 text-slate-300 light:border-slate-900/20 light:text-slate-600">{children}</blockquote>
+  ),
+  hr: () => <hr className="my-3 border-white/10 light:border-slate-900/10" />,
+  table: ({ children }) => (
+    <div className="my-2 overflow-x-auto">
+      <table className="w-full border-collapse text-sm">{children}</table>
+    </div>
+  ),
+  th: ({ children }) => <th className="border border-white/10 px-2 py-1 text-left font-semibold light:border-slate-900/10">{children}</th>,
+  td: ({ children }) => <td className="border border-white/10 px-2 py-1 light:border-slate-900/10">{children}</td>,
+};
+
+function Markdown({ children }) {
+  return (
+    <div className="break-words text-[15px] leading-relaxed text-slate-100 light:text-slate-800">
+      <ReactMarkdown remarkPlugins={[remarkGfm]} components={MD_COMPONENTS}>
+        {children}
+      </ReactMarkdown>
+    </div>
+  );
+}
+
 function Message({ role, content }) {
   // User: subtle right-aligned bubble. Assistant: clean flowing text with the
   // sparkle avatar (Claude-style — no bubble, no user avatar).
@@ -96,7 +152,7 @@ function Message({ role, content }) {
     <div className="flex gap-4">
       <AssistantAvatar />
       <div className="min-w-0 flex-1 pt-0.5">
-        <div className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-slate-100 light:text-slate-800">{content}</div>
+        <Markdown>{content}</Markdown>
       </div>
     </div>
   );
@@ -647,8 +703,8 @@ export default function Chat() {
       <div ref={scrollRef} onScroll={onScroll} className="flex-1 overflow-y-auto">
         {empty ? (
           <div className="mx-auto flex h-full max-w-2xl flex-col items-center justify-center px-6 text-center">
-            <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-2xl text-white shadow-xl shadow-indigo-500/30">
-              <Sparkles className="h-4 w-4 text-white" />
+            <div className="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-indigo-400 to-fuchsia-500 text-2xl text-[#101820] shadow-xl shadow-indigo-500/30">
+              <Sparkles className="h-4 w-4 text-[#101820]" />
             </div>
             <h1 className="text-2xl font-bold">How can I help, {student?.name?.split(' ')[0] || 'there'}?</h1>
             <p className="mt-2 text-sm text-slate-400 light:text-slate-500">
@@ -698,7 +754,7 @@ export default function Chat() {
       {/* Composer */}
       <div className="relative shrink-0 px-6 pb-4 pt-2">
         {/* soft fade so messages scroll under the composer (Claude-style) */}
-        <div className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-[#0b0f1a] light:from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-x-0 -top-8 h-8 bg-gradient-to-t from-[#101820] light:from-white to-transparent" />
         <div className="mx-auto max-w-3xl">
           {voiceErr && (
             <div className="mb-2 flex items-center justify-between gap-3 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-1.5 text-xs text-red-200 light:text-red-700">
@@ -734,7 +790,7 @@ export default function Chat() {
             <button
               onClick={() => send()}
               disabled={busy || !input.trim()}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-indigo-500 text-white transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-indigo-500 text-[#101820] transition hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-40"
               aria-label="Send"
             >
               <ArrowUp className="h-5 w-5" />
@@ -748,7 +804,7 @@ export default function Chat() {
 
       {/* Hands-free conversation overlay */}
       {voiceMode && (
-        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[#0b0f1a]/95 light:bg-white/95 backdrop-blur-sm">
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-8 bg-[#101820]/95 light:bg-white/95 backdrop-blur-sm">
           <VoiceOrb state={voiceState} />
           <div className="text-center">
             <div className="text-xl font-semibold text-slate-100 light:text-slate-800">

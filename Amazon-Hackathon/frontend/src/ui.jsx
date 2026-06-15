@@ -85,7 +85,7 @@ export function ImportanceBadge({ importance }) {
 
 export function Button({ children, variant = 'primary', className = '', ...rest }) {
   const variants = {
-    primary: 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-sm shadow-indigo-500/20',
+    primary: 'bg-indigo-500 hover:bg-indigo-400 text-[#101820] shadow-sm shadow-indigo-500/20',
     ghost:
       'bg-white/5 hover:bg-white/10 text-slate-200 border border-white/10 light:bg-slate-900/[0.04] light:hover:bg-slate-900/[0.08] light:text-slate-700 light:border-slate-900/15',
     danger: 'bg-red-500/80 hover:bg-red-500 text-white',

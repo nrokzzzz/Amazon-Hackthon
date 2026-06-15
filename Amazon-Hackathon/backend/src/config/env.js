@@ -10,17 +10,24 @@ import path from 'path';
 // an in-memory MONGODB_URI that must take precedence over the .env value.
 const envPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.env');
 dotenv.config({ path: envPath });
-
+console.log(process.env.MONGODB_URI)
 // Central config object. Secrets live ONLY here on the backend — never in the frontend.
 export const config = {
   port: process.env.PORT || 4000,
   nodeEnv: process.env.NODE_ENV || 'development',
 
-  mongoUri: process.env.MONGODB_URI || 'mongodb://localhost:27017/campusflow',
+  mongoUri: 'mongodb://shaikumar14363:Umar%4010112004@ac-v5tqwxk-shard-00-00.tvjmpgw.mongodb.net:27017,ac-v5tqwxk-shard-00-01.tvjmpgw.mongodb.net:27017,ac-v5tqwxk-shard-00-02.tvjmpgw.mongodb.net:27017/?ssl=true&replicaSet=atlas-x7s8n7-shard-0&authSource=admin&appName=LearningMongoDB',
   // The DB name to use. Atlas SRV strings often omit it (…mongodb.net/?…), which
   // would otherwise dump everything into the default `test` database — so we pin
   // it here (overridable via MONGODB_DB).
   mongoDbName: process.env.MONGODB_DB || 'campusflow',
+  // Optional public DNS resolvers (comma-separated) for the mongodb+srv SRV
+  // lookup. Set MONGODB_DNS_SERVERS=8.8.8.8,1.1.1.1 when the local/ISP/VPN
+  // resolver refuses SRV queries (error: querySrv ECONNREFUSED). No OS change.
+  dnsServers: (process.env.MONGODB_DNS_SERVERS || '')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean),
 
   jwtSecret: process.env.JWT_SECRET || 'dev-only-insecure-secret-change-me',
 

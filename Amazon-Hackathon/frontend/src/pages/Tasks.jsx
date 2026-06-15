@@ -247,7 +247,7 @@ export default function Tasks() {
           </p>
           <Link
             to="/profile"
-            className="mt-4 inline-block rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-400"
+            className="mt-4 inline-block rounded-lg bg-indigo-500 px-4 py-2 text-sm font-medium text-[#101820] hover:bg-indigo-400"
           >
             Connect account
           </Link>
