@@ -10,13 +10,16 @@ import path from 'path';
 // an in-memory MONGODB_URI that must take precedence over the .env value.
 const envPath = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.env');
 dotenv.config({ path: envPath });
-console.log(process.env.MONGODB_URI)
+
 // Central config object. Secrets live ONLY here on the backend — never in the frontend.
 export const config = {
   port: process.env.PORT || 4000,
   nodeEnv: process.env.NODE_ENV || 'development',
 
-  mongoUri: 'mongodb://shaikumar14363:Umar%4010112004@ac-v5tqwxk-shard-00-00.tvjmpgw.mongodb.net:27017,ac-v5tqwxk-shard-00-01.tvjmpgw.mongodb.net:27017,ac-v5tqwxk-shard-00-02.tvjmpgw.mongodb.net:27017/?ssl=true&replicaSet=atlas-x7s8n7-shard-0&authSource=admin&appName=LearningMongoDB',
+  // Read the connection string from the environment (.env or a programmatically
+  // injected var, e.g. the `--mem` script's in-memory URI). Falls back to a local
+  // mongod for convenience. NEVER commit real credentials here.
+  mongoUri: process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/campusflow',
   // The DB name to use. Atlas SRV strings often omit it (…mongodb.net/?…), which
   // would otherwise dump everything into the default `test` database — so we pin
   // it here (overridable via MONGODB_DB).
